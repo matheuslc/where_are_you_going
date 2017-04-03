@@ -11,14 +11,20 @@ class MySpider(scrapy.Spider):
   def start_requests(self):
     return [scrapy.FormRequest(
       self.login_url,
-      method='POST',
+      method='GET',
+      callback=self.login
+    )]
+
+  def login(self, response):
+    return scrapy.FormRequest.from_response(
+      response,
       formdata={'username': self.username, 'password': self.password},
       callback=self.logged
-    )]
+    )
 
   def logged(self, response):
     for url in self.start_urls:
-      yield scrapy.Request(url=url, cookies=response.headers.getlist('Set-Cookie'), callback=self.parse)
+      yield scrapy.Request(url=url, headers=response.headers, callback=self.parse)
 
   def parse(self, response):
     inspect_response(response, self)
