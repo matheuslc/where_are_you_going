@@ -1,11 +1,12 @@
 import scrapy
+from where_are_you_going.items import Alumni
 from scrapy.shell import inspect_response
 
-class MySpider(scrapy.Spider):
+class Cagr(scrapy.Spider):
   name = 'cagr'
   login_url = 'https://sistemas.ufsc.br/login?service=https%3A%2F%2Fcagr.sistemas.ufsc.br%2Fj_spring_cas_security_check&userType=padrao&convertToUserType=alunoGraduacao&lockUserType=1';
   start_urls = [
-    'https://cagr.sistemas.ufsc.br/modules/aluno/historicoEscolar/',
+    'https://cagr.sistemas.ufsc.br/modules/aluno/espelhoMatricula/',
   ]
 
   def start_requests(self):
@@ -27,4 +28,9 @@ class MySpider(scrapy.Spider):
       yield scrapy.Request(url=url, headers=response.headers, callback=self.parse)
 
   def parse(self, response):
-    inspect_response(response, self)
+    AlumniItem = Alumni(
+      name=response.css('td.aluno_info_col4 span::text').extract_first(),
+      registry=response.css('td.aluno_info_col2 span::text').extract_first()
+    )
+
+    return AlumniItem
