@@ -24,5 +24,14 @@ class DatabasePipeline(object):
     self.client.close()
 
   def process_item(self, item, spider):
-    self.db[self.collection_name].insert(dict(item))
-    return item
+    user = self.db[self.collection_name].find_one({'registry': item['registry']})
+
+    if user:
+      self.db[self.collection_name].update({
+        'registry': item['registry']
+      }, item)
+      return item
+
+    if not user:
+      self.db[self.collection_name].insert_one(item)
+      return item
