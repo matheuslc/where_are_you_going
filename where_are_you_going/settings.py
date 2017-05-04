@@ -14,6 +14,8 @@ BOT_NAME = 'where_are_you_going'
 SPIDER_MODULES = ['where_are_you_going.spiders']
 NEWSPIDER_MODULE = 'where_are_you_going.spiders'
 
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'mom'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'where_are_you_going (+http://www.yourdomain.com)'
@@ -64,9 +66,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'where_are_you_going.pipelines.WhereAreYouGoingPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'where_are_you_going.pipelines.DatabasePipeline': 100,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
