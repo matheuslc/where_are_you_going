@@ -28,17 +28,25 @@ class Cagr(scrapy.Spider):
       yield scrapy.Request(url=url, headers=response.headers, callback=self.parse)
 
   def parse(self, response):
+    year = response.css('td.aluno_info_col2 select option::text').extract_first()
+    disciplines = []
+    info = response.css('td.aluno_info_col4')
+    info2 = response.css('td.aluno_info_col2')
+
     AlumniItem = Alumni(
-      name=response.css('td.aluno_info_col4 span::text').extract_first(),
-      registry=response.css('td.aluno_info_col2 span::text').extract_first()
+      name=info.css('span::text').extract_first(),
+      registry=info2.css('span::text').extract_first(),
+      situation=info2.css('span::text')[1].extract(),
+      course=info.css('span::text')[1].extract(),
+      curriculum=response.css('td.aluno_info_col6 span::text')[1].extract()
     )
+
+    AlumniItem['semester'] = {year: []}
 
     for table in response.css('.rich-table'):
       if table.css('.rich-table-headercell::text').extract_first() == 'Resultados':
-        AlumniItem['semester'] = [];
-
         for index, row in enumerate(table.css('tbody tr')):
-          AlumniItem['semester'].append([dict({
+          disciplines.append([{
             'step': row.css('td:nth-child(1)::text').extract_first(),
             'discipline': row.css('td:nth-child(2)::text').extract_first(),
             'class': row.css('td:nth-child(3)::text').extract_first(),
@@ -49,6 +57,8 @@ class Cagr(scrapy.Spider):
             'time': row.css('td:nth-child(8)::text').extract_first(),
             'note': row.css('td:nth-child(9)::text').extract_first(),
             'frequency': row.css('td:nth-child(10)::text').extract_first()
-          })])
+          }])
+
+    AlumniItem['semester'][year] = disciplines
 
     return AlumniItem
